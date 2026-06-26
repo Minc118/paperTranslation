@@ -10,6 +10,10 @@ Citation format:
 
 All factual claims must cite the original PDF page number, section, and block ID. Do not cite the Chinese translation as evidence.
 
+Use the smallest defensible relevance judgment: `Relevant`, `Partially relevant`, or `Not relevant`. Do not treat a passage as evidence merely because it is topically related. If visual evidence is used, cite the figure/table block or caption block.
+
+The Question-Answer Review may summarize, synthesize, and interpret with citations. This does not apply to the Bilingual Paper Body, which must preserve original source text and provide faithful Chinese translation.
+
 ---
 
 # Q1. Question text
@@ -28,6 +32,12 @@ Chinese answer with original PDF page-number citations.
 |---|---|---|---|
 | Chinese claim here | [p. X, Section Y, Block P-0XX] | Short English quote or faithful paraphrase | Chinese explanation |
 
+## Visual evidence, if any
+
+| Figure/table evidence | Citation | Why it matters |
+|---|---|---|
+| Fig. / Table / caption | [p. X, Section Y, Block FIGCAP-0XX] | Chinese explanation |
+
 ## Detailed answer
 
 Detailed Chinese explanation with citations.
@@ -39,7 +49,7 @@ Detailed Chinese explanation with citations.
 
 ## Uncertainty
 
-State whether the paper fully answers, partially answers, or does not answer the question.
+State whether the paper fully answers, partially answers, or does not answer the question. If the answer relies on interpretation, label it as interpretation and cite the supporting blocks. If support is metadata-only, title-only, abstract-only, or unchecked, state that limitation explicitly.
 
 ---
 

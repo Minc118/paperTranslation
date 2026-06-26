@@ -95,6 +95,7 @@ Stage 2 starts only after questions are confirmed.
 In Stage 2:
 
 - Read the paper with the confirmed questions in mind.
+- Before translation or question answering, build a full-document source map / `extraction_blocks.json`.
 - Extract paper structure and logical blocks.
 - Assign stable block IDs.
 - Record original PDF page numbers.
@@ -126,6 +127,7 @@ outputs/<paper-name>/
 ├── glossary.md
 ├── paper_structure_map.md
 ├── extraction_blocks.json
+├── translation_notes.md
 └── quality_check_report.md
 ```
 
@@ -143,6 +145,25 @@ Quality-check note or appendix if needed
 ```
 
 The question-answer review and glossary must appear before the translated paper body so the reader knows what to look for before reading the full bilingual text. The full `question_answer_review.md` must also be created as a separate file.
+
+## Source-Faithful Full-Paper Translation Rule
+
+Distinguish the review layer from the paper body:
+
+```text
+Question-Answer Review = may summarize, synthesize, and interpret with citations.
+Bilingual Paper Body = must preserve original source text and provide a faithful Chinese translation.
+```
+
+The `Bilingual Paper Body` must be a full, source-faithful bilingual translation of the paper. For every main-text block, preserve the original English text as extracted from the source paper, except for minimal cleanup of obvious PDF extraction artifacts, and translate that preserved block into Chinese. Do not summarize, compress, rewrite, simplify, explain in place of, or omit original main-text paragraphs except for bibliography entries, front matter explicitly excluded by project rules, or content explicitly excluded by the user.
+
+Hard failure rule:
+
+```text
+If any main-text block in the Bilingual Paper Body is a summary, paraphrase, compressed rewrite, or explanatory replacement instead of the original source text plus Chinese translation, the output fails the task.
+```
+
+The source map / `extraction_blocks.json` must represent the original paper text, not a summarized version of it.
 
 ## Facing-Page PDF Layout
 
@@ -179,6 +200,8 @@ Rules:
 - Do not cite the Chinese translation as evidence.
 - If interpretation is necessary, mark it as interpretation and cite the supporting source blocks.
 - If a claim cannot be linked to an original PDF page number and block ID, do not include it as a factual answer.
+- Do not treat a passage as evidence merely because it is topically related.
+- If visual evidence is used, cite the figure/table block or caption block.
 
 ## Not-Relevant Rule
 
@@ -193,6 +216,8 @@ Do not invent an answer, use external knowledge, or over-interpret unrelated pas
 ## Paper-Specific Glossary Policy
 
 Every processed paper must have a paper-specific glossary based on terminology actually used in that paper.
+
+Build a paper-specific terminology ledger as the single source of truth for translation terms. Generate the final `glossary.md` from that ledger.
 
 Workflow:
 
@@ -213,9 +238,19 @@ Before final reporting, verify:
 - Stage 1 did not read or translate the full paper.
 - Stage 2 used confirmed questions.
 - Required output files exist.
+- `extraction_blocks.json` / source map exists.
+- Every block has a stable block ID and original PDF page number.
 - Output order is correct.
 - Original English and Chinese translation are both preserved.
 - Citations use original PDF page numbers, sections, and block IDs.
+- Every factual question-answer claim has at least one source block citation.
+- Question-answer review cites figure/table blocks when visual evidence is used.
 - Not-relevant questions are not answered with invented content.
-- Glossary is paper-specific.
+- Glossary is paper-specific and terminology ledger choices are applied consistently.
+- Uncertain or missing content is recorded in `quality_check_report.md` or `translation_notes.md`.
+- Every main-text paragraph from the original paper is represented in the Bilingual Paper Body as original English + Chinese translation.
+- No main-text paragraph is replaced by a summary, paraphrase, or explanatory rewrite.
+- The source map is based on original extracted text, not compressed reading notes.
+- The number of original source blocks and translated blocks is reported.
+- Any omitted sections, paragraphs, figures, tables, captions, or references are explicitly listed with reasons.
 - Any PDF alignment limitations are reported.

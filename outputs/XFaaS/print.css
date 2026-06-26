@@ -1,0 +1,215 @@
+@page {
+  size: A4;
+  margin: 22mm 18mm;
+}
+
+@page :left {
+  margin-left: 16mm;
+  margin-right: 22mm;
+}
+
+@page :right {
+  margin-left: 22mm;
+  margin-right: 16mm;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  color: #1f2933;
+  font-family: "Noto Serif", "Noto Serif CJK SC", "Songti SC", "Times New Roman", serif;
+  font-size: 10.5pt;
+  line-height: 1.58;
+  margin: 0;
+}
+
+h1,
+h2,
+h3 {
+  color: #111827;
+  line-height: 1.25;
+  margin: 0 0 0.8em;
+}
+
+h1 {
+  font-size: 26pt;
+}
+
+h2 {
+  border-bottom: 1px solid #d0d7de;
+  font-size: 16pt;
+  padding-bottom: 0.25em;
+}
+
+h3 {
+  font-size: 12.5pt;
+}
+
+p,
+li,
+table,
+pre,
+blockquote {
+  margin-top: 0;
+}
+
+table {
+  border-collapse: collapse;
+  font-size: 9pt;
+  width: 100%;
+}
+
+th,
+td {
+  border: 1px solid #d0d7de;
+  padding: 6px 8px;
+  vertical-align: top;
+}
+
+th {
+  background: #f3f4f6;
+  font-weight: 700;
+}
+
+code,
+pre {
+  font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+}
+
+pre {
+  background: #f6f8fa;
+  border: 1px solid #d0d7de;
+  font-size: 8.5pt;
+  overflow-wrap: anywhere;
+  padding: 10px;
+  white-space: pre-wrap;
+}
+
+.page {
+  break-after: page;
+  page-break-after: always;
+}
+
+.cover {
+  align-content: center;
+  min-height: 240mm;
+}
+
+.cover .subtitle {
+  color: #4b5563;
+  font-size: 14pt;
+  margin-bottom: 2em;
+}
+
+.cover dl {
+  border-top: 1px solid #d0d7de;
+  display: grid;
+  gap: 0.75em;
+  padding-top: 1em;
+}
+
+.cover dt {
+  color: #4b5563;
+  font-size: 8.5pt;
+  text-transform: uppercase;
+}
+
+.cover dd {
+  margin: 0;
+}
+
+.front-matter {
+  break-before: page;
+}
+
+.front-matter section {
+  break-after: page;
+}
+
+.paper-body {
+  break-before: page;
+}
+
+.body-title p,
+.block-meta {
+  color: #586069;
+  font-size: 8.5pt;
+}
+
+.spread-group {
+  display: contents;
+}
+
+.facing-page {
+  break-after: page;
+  min-height: 245mm;
+  page-break-after: always;
+}
+
+.english-page {
+  break-before: right;
+}
+
+.chinese-page {
+  break-before: left;
+  font-family: "Noto Serif CJK SC", "Songti SC", "Noto Serif", serif;
+}
+
+.content {
+  widows: 3;
+  orphans: 3;
+}
+
+.content figure,
+.content table,
+.content pre,
+.content blockquote {
+  break-inside: avoid;
+  page-break-inside: avoid;
+}
+
+.content img {
+  height: auto;
+  max-width: 100%;
+}
+
+.block {
+  break-inside: avoid;
+  margin-bottom: 1em;
+}
+
+.block-id {
+  color: #6b7280;
+  display: block;
+  font-family: "SFMono-Regular", Consolas, monospace;
+  font-size: 7.5pt;
+  margin-bottom: 0.25em;
+}
+
+.equation,
+.formula {
+  font-family: "STIX Two Math", "Cambria Math", "Times New Roman", serif;
+  overflow-wrap: anywhere;
+}
+
+.appendix {
+  font-size: 9.5pt;
+}
+
+@media screen {
+  body {
+    background: #e5e7eb;
+    padding: 24px;
+  }
+
+  .page {
+    background: white;
+    box-shadow: 0 2px 12px rgb(15 23 42 / 16%);
+    margin: 0 auto 24px;
+    max-width: 794px;
+    min-height: 1123px;
+    padding: 72px;
+  }
+}

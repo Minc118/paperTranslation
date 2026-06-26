@@ -23,13 +23,17 @@ Tasks:
 3. Extract logical blocks instead of raw PDF lines.
 4. Assign stable block IDs.
 5. Record original PDF page numbers for each block.
-6. Translate the full main text into natural Chinese.
-7. Preserve the original English text.
-8. Do not translate the bibliography unless explicitly requested.
-9. Tag blocks by relevant question IDs.
-10. Create a paper-specific glossary based on actual terminology in the paper.
-11. Use default glossary terms only when they match the paper domain.
-12. Generate the required outputs:
+6. Build the Bilingual Paper Body as a full, source-faithful bilingual translation, not a summary.
+7. Preserve the original English text for every main-text block, except for minimal cleanup of obvious PDF extraction artifacts.
+8. Translate each preserved original English block into natural Chinese.
+9. Do not compress, paraphrase, simplify, summarize, or replace original paragraphs with explanations in the Bilingual Paper Body.
+10. If extraction is uncertain, keep the extracted original text and mark the uncertainty in `translation_notes.md` or `quality_check_report.md`.
+11. Ensure the source map / `extraction_blocks.json` represents original paper text, not summarized reading notes.
+12. Do not translate the bibliography unless explicitly requested.
+13. Tag blocks by relevant question IDs.
+14. Create a paper-specific glossary based on actual terminology in the paper.
+15. Use default glossary terms only when they match the paper domain.
+16. Generate the required outputs:
 
 ```text
 outputs/<paper-name>/
@@ -46,6 +50,7 @@ outputs/<paper-name>/
 ├── glossary.md
 ├── paper_structure_map.md
 ├── extraction_blocks.json
+├── translation_notes.md
 └── quality_check_report.md
 ```
 
@@ -81,3 +86,26 @@ For not-relevant questions, answer exactly:
 ```
 
 Run a quality check before the final response. Confirm required files, output order, citation rules, not-relevant handling, paper-specific glossary use, and any PDF alignment limitations.
+
+Important distinction:
+
+```text
+Question-Answer Review = may summarize, synthesize, and interpret with citations.
+Bilingual Paper Body = must preserve original source text and provide a faithful Chinese translation.
+```
+
+Hard failure rule:
+
+```text
+If any main-text block in the Bilingual Paper Body is a summary, paraphrase, compressed rewrite, or explanatory replacement instead of the original source text plus Chinese translation, the output fails the task.
+```
+
+Before finishing Stage 2, explicitly report:
+
+- whether the bilingual paper body is full-text or summarized
+- number of original source blocks extracted
+- number of translated blocks
+- any omitted sections or paragraphs
+- any omitted figures/tables/captions
+- any extraction limitations
+- whether any block was paraphrased or compressed

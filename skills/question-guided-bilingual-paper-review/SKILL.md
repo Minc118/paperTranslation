@@ -62,6 +62,7 @@ outputs/<paper-name>/
 ├── glossary.md
 ├── paper_structure_map.md
 ├── extraction_blocks.json
+├── translation_notes.md
 └── quality_check_report.md
 ```
 
@@ -112,6 +113,7 @@ Stage 2 starts only after questions are confirmed.
 Required actions:
 
 - read the paper with the confirmed questions in mind
+- before translation or question answering, build a full-document source map / `extraction_blocks.json`
 - extract paper structure
 - extract logical blocks
 - assign stable block IDs
@@ -124,6 +126,8 @@ Required actions:
 - generate a citation-based question-answer review
 - mark each question as `Relevant`, `Partially relevant`, or `Not relevant`
 - run quality checks
+
+The source map is the basis for translation, source citations, question-answer evidence, the terminology ledger / glossary, and follow-up review.
 
 ## Logical Block Extraction
 
@@ -176,17 +180,38 @@ Each block should track:
 ```json
 {
   "block_id": "P-001",
+  "order": 1,
   "source_pdf_page": 1,
   "section": "I. Introduction",
   "block_type": "paragraph",
+  "source_anchor": "[p. 1, Section I. Introduction, Block P-001]",
   "original_text": "...",
   "chinese_translation": "...",
   "relevant_questions": ["Q1"],
+  "confidence": "high | medium | low",
+  "related_figures": [],
+  "related_tables": [],
+  "bbox": null,
+  "extraction_notes": "",
   "notes": ""
 }
 ```
 
 `source_pdf_page` must refer to the original PDF page number, not the generated bilingual PDF page number.
+
+The required citation format remains unchanged:
+
+```text
+[p. X, Section Y, Block P-0XX]
+```
+
+## Figure and Table Handling
+
+- Preserve figures, tables, captions, and table notes whenever possible.
+- Place figures and tables near the first substantive mention, not necessarily by exact PDF visual position.
+- Keep the original caption and Chinese caption together.
+- If a figure/table is used as evidence for an answer, cite the figure/table block or caption block.
+- If crop, placement, or extraction is uncertain, mark it in `quality_check_report.md` or `translation_notes.md`.
 
 ## Translation Rules
 
@@ -209,6 +234,8 @@ Rules:
 
 The glossary must be paper-specific. Do not force a default glossary onto unrelated papers.
 
+Build a paper-specific terminology ledger as the single source of truth for translation terms. The final `glossary.md` should be generated from this ledger.
+
 Workflow:
 
 1. Detect paper domain.
@@ -218,6 +245,16 @@ Workflow:
 5. Create a paper-specific glossary.
 6. Use the paper-specific glossary consistently in translation.
 7. Report uncertain terminology choices in the quality-check note.
+
+For important terms, track:
+
+- canonical English term
+- Chinese translation
+- variants seen in the paper
+- first-use source block
+- definition or explanation if available
+- decision note
+- uncertainty if any
 
 ### Serverless / FaaS Reference Glossary
 
@@ -273,6 +310,36 @@ Quality-check note or appendix if needed
 
 The question-answer review and glossary must appear before the translated paper body. The full review must also be created as `question_answer_review.md`.
 
+## Source-Faithful Full-Paper Translation Rule
+
+Distinguish the review layer from the paper body:
+
+```text
+Question-Answer Review = may summarize, synthesize, and interpret with citations.
+Bilingual Paper Body = must preserve original source text and provide a faithful Chinese translation.
+```
+
+The `Bilingual Paper Body` must be a full, source-faithful bilingual translation of the paper.
+
+For every main-text block:
+
+1. Preserve the original English text as extracted from the source paper, except for minimal cleanup of obvious PDF extraction artifacts.
+2. Do not summarize the original paper body.
+3. Do not compress multiple original paragraphs into one short paraphrase.
+4. Do not rewrite the original English into simplified English.
+5. Do not replace original paragraphs with explanations.
+6. Do not omit original paragraphs unless they are bibliography entries, front matter explicitly excluded by the project rules, or content explicitly excluded by the user.
+7. Translate the preserved original English block into Chinese directly below it in Markdown, or on the paired facing page in PDF.
+8. If extraction is uncertain, keep the extracted original text and mark the uncertainty in `translation_notes.md` or `quality_check_report.md`.
+9. The bilingual paper body must allow the user to review the original wording and the Chinese translation side by side.
+10. The source map / `extraction_blocks.json` must represent the original paper text, not a summarized version of it.
+
+Hard failure rule:
+
+```text
+If any main-text block in the Bilingual Paper Body is a summary, paraphrase, compressed rewrite, or explanatory replacement instead of the original source text plus Chinese translation, the output fails the task.
+```
+
 ## PDF Layout
 
 The final PDF must be a facing-page bilingual PDF.
@@ -324,6 +391,11 @@ Rules:
 - If a claim cannot be linked to an original PDF page number and block ID, do not include it as a factual answer.
 - Do not cite the Chinese translation as evidence.
 - If interpretation is necessary, clearly mark it as interpretation and cite the supporting source blocks.
+- Do not treat a passage as evidence merely because it is topically related.
+- Use the smallest defensible relevance judgment: `Relevant`, `Partially relevant`, or `Not relevant`.
+- If the paper only weakly supports an answer, mark it as `Partially relevant`.
+- If a claim relies on interpretation, clearly label it as interpretation and cite the supporting blocks.
+- Metadata-only, title-only, abstract-only, or unchecked blocks cannot support detailed body-level claims unless the answer explicitly says the support is limited.
 
 Hard rule:
 
@@ -419,16 +491,28 @@ This is a relevance judgment based on the extracted structure and searched block
 Before final response, check:
 
 - required files exist
+- `extraction_blocks.json` / source map exists
 - output order is correct
 - confirmed questions appear before the paper body
 - question-answer review appears before the paper body and as a separate file
 - glossary appears before the paper body
+- every block has a stable block ID and original PDF page number
 - every factual answer claim has original PDF page, section, and block citation
+- every factual QA claim has at least one source block citation
+- every figure/table asset or placeholder has a source pointer
+- question-answer review cites figure/table blocks when visual evidence is used
 - not-relevant questions use the required not-relevant answer
 - bibliography was not translated unless requested
-- technical terms are consistent with the paper-specific glossary
+- technical terms are consistent with the terminology ledger / paper-specific glossary
+- uncertain or missing content is recorded in `quality_check_report.md` or `translation_notes.md`
 - any uncertain terminology is reported
 - PDF layout uses facing pages for the body or reports alignment limitations
+- no unsupported or over-interpreted answers are included
+- every main-text paragraph from the original paper is represented in the Bilingual Paper Body as original English + Chinese translation
+- no main-text paragraph is replaced by a summary, paraphrase, or explanatory rewrite
+- the source map is based on original extracted text, not compressed reading notes
+- the number of original source blocks and translated blocks is reported
+- any omitted sections, paragraphs, figures, tables, captions, or references are explicitly listed with reasons
 
 ## Final Response Format
 
@@ -454,3 +538,10 @@ For Stage 2, report:
 - glossary policy confirmation
 - quality-check result
 - limitations
+- whether the bilingual paper body is full-text or summarized
+- number of original source blocks extracted
+- number of translated blocks
+- any omitted sections or paragraphs
+- any omitted figures/tables/captions
+- any extraction limitations
+- whether any block was paraphrased or compressed

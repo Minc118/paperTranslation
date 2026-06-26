@@ -1,0 +1,621 @@
+[
+  {
+    "block_id": "TIT-001",
+    "source_pdf_page": 1,
+    "section": "Title",
+    "block_type": "title",
+    "original_text": "XFaaS: Hyperscale and Low Cost Serverless Functions at Meta",
+    "chinese_translation": "XFaaS：Meta 的超大规模、低成本无服务器函数平台",
+    "relevant_questions": [],
+    "notes": ""
+  },
+  {
+    "block_id": "AUTH-001",
+    "source_pdf_page": 1,
+    "section": "Title",
+    "block_type": "authors",
+    "original_text": "Alireza Sahraei, Soteris Demetriou, Amirali Sobhgol, Haoran Zhang, Abhigna Nagaraja, Neeraj Pathak, Girish Joshi, Carla Souza, Bo Huang, Wyatt Cook, Andrii Golovei, Pradeep Venkat, Andrew McFague, Dimitrios Skarlatos, Vipul Patel, Ravinder Thind, Ernesto Gonzalez, Yun Jin, and Chunqiang Tang. Meta Platforms, Imperial College London, University of Pennsylvania, Carnegie Mellon University.",
+    "chinese_translation": "作者包括 Alireza Sahraei、Soteris Demetriou、Amirali Sobhgol、Haoran Zhang、Abhigna Nagaraja、Neeraj Pathak、Girish Joshi、Carla Souza、Bo Huang、Wyatt Cook、Andrii Golovei、Pradeep Venkat、Andrew McFague、Dimitrios Skarlatos、Vipul Patel、Ravinder Thind、Ernesto Gonzalez、Yun Jin 和 Chunqiang Tang；机构包括 Meta Platforms、Imperial College London、University of Pennsylvania 和 Carnegie Mellon University。",
+    "relevant_questions": [],
+    "notes": ""
+  },
+  {
+    "block_id": "ABS-001",
+    "source_pdf_page": 1,
+    "section": "Abstract",
+    "block_type": "abstract",
+    "original_text": "Function-as-a-Service (FaaS) has become a popular programming paradigm in Serverless Computing. As the responsibility of resource provisioning shifts from users to cloud providers, the ease of use of FaaS for users may come at the expense of extra hardware costs for cloud providers. This paper presents XFaaS in Meta's hyperscale private cloud, which processes trillions of function calls per day on more than 100,000 servers. XFaaS uses optimizations that help achieve a daily average CPU utilization of 66%, including approximating universal workers, deferring delay-tolerant functions to off-peak hours, globally dispatching calls across regions, and using TCP-like congestion control for downstream services.",
+    "chinese_translation": "函数即服务（FaaS）已经成为无服务器计算中的常见编程范式。随着资源供给责任从用户转移到云服务提供方，FaaS 对用户的易用性可能转化为云服务提供方额外的硬件成本。本文介绍 Meta 超大规模私有云中的 XFaaS：它每天处理数万亿次函数调用，运行在超过 100,000 台服务器之上。XFaaS 通过一组优化达到 66% 的日均 CPU 利用率，包括近似“通用工作节点”、把可延迟函数推迟到低峰期、跨区域全局分发调用，以及用类似 TCP 的拥塞控制机制保护下游服务。",
+    "relevant_questions": [
+      "Q1",
+      "Q2",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-001",
+    "source_pdf_page": 1,
+    "section": "1 Introduction",
+    "block_type": "paragraph",
+    "original_text": "With FaaS, developers create individual functions and upload them to a provider platform, where the platform provisions resources and executes functions in response to external events. This frees developers from managing VMs or containers.",
+    "chinese_translation": "在 FaaS 中，开发者创建单个函数并上传到云服务提供方的平台；平台负责资源供给，并在外部事件触发时执行函数。这让开发者不必直接管理虚拟机或容器。",
+    "relevant_questions": [
+      "Q1",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-002",
+    "source_pdf_page": 1,
+    "section": "1 Introduction",
+    "block_type": "paragraph",
+    "original_text": "The ease of use of FaaS may come at the expense of extra hardware costs for cloud providers. Before FaaS, users carried the cost of underutilized VMs; with FaaS, cloud providers bear the cost of over-provisioned resources.",
+    "chinese_translation": "FaaS 的易用性可能以云服务提供方承担额外硬件成本为代价。在 FaaS 之前，用户承担为间歇性调用而过度配置、但利用率不足的 VM 成本；在 FaaS 模式下，过度供给资源的成本转移给云服务提供方。",
+    "relevant_questions": [
+      "Q1",
+      "Q2"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-003",
+    "source_pdf_page": 1,
+    "section": "1 Introduction",
+    "block_type": "paragraph",
+    "original_text": "Meta operates XFaaS in a hyperscale private cloud. XFaaS processes trillions of function calls per day on more than 100,000 servers across tens of datacenter regions, making hardware-cost reduction a top priority.",
+    "chinese_translation": "Meta 在超大规模私有云中运行 XFaaS。XFaaS 每天处理数万亿次函数调用，分布在数十个数据中心区域、超过 100,000 台服务器上，因此降低硬件成本成为首要目标。",
+    "relevant_questions": [
+      "Q2",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "FIGCAP-001",
+    "source_pdf_page": 2,
+    "section": "1.1 Risk of Extra Hardware Costs",
+    "block_type": "figure caption",
+    "original_text": "Figure 1. Lifecycle of a function. The lifecycle includes VM startup, fetching code, container initialization, runtime startup, library and code loading, optional JIT compilation, invocation, and later container/VM shutdown.",
+    "chinese_translation": "图 1. 函数生命周期。生命周期包括启动 VM、获取代码、初始化容器、启动运行时、加载库和函数代码、可选 JIT 编译、调用函数，以及之后关闭容器/VM。",
+    "relevant_questions": [
+      "Q1"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-004",
+    "source_pdf_page": 2,
+    "section": "1.1 Risk of Extra Hardware Costs",
+    "block_type": "paragraph",
+    "original_text": "Lengthy cold-start time is a significant FaaS challenge because initialization and shutdown steps are overheads borne by the provider, while only invocation does chargeable work. If the idle wait is too long, containers waste resources; if too short, the next request pays initialization overhead again.",
+    "chinese_translation": "较长的冷启动时间是 FaaS 的重要挑战，因为初始化和关闭步骤都属于由平台承担的开销，只有实际调用阶段执行可计费工作。如果空闲等待时间过长，容器会闲置浪费资源；如果等待时间过短，下一个请求又要重新承担初始化开销。",
+    "relevant_questions": [
+      "Q1",
+      "Q2"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-005",
+    "source_pdf_page": 2,
+    "section": "1.1 Risk of Extra Hardware Costs",
+    "block_type": "paragraph",
+    "original_text": "High load variance creates a tradeoff between extra hardware cost from over-provisioning and overload during surges. XFaaS sees a peak-to-trough ratio as high as 4.3, so provisioning for peak demand would create severe waste.",
+    "chinese_translation": "负载高度波动会带来取舍：若按峰值配置，会产生额外硬件成本；若配置不足，负载激增时系统会过载。XFaaS 的峰谷比最高达到 4.3，因此按峰值配置会造成严重浪费。",
+    "relevant_questions": [
+      "Q1",
+      "Q2",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-006",
+    "source_pdf_page": 2,
+    "section": "1.1 Risk of Extra Hardware Costs",
+    "block_type": "paragraph",
+    "original_text": "FaaS functions can overload downstream services. Meta experienced outages when spikes from non-user-facing functions overloaded a social-graph database. Static per-function concurrency limits are insufficient because limits that are too low waste resources, while limits that are too high can increase error rates for online services.",
+    "chinese_translation": "FaaS 函数还可能压垮下游服务。Meta 曾遇到非用户直接访问函数的调用峰值压垮社交图数据库，从而导致面向用户的在线服务错误率升高。静态的单函数并发限制并不充分：限制过低会浪费 FaaS 平台和数据库资源，限制过高又可能让在线服务错误率升高。",
+    "relevant_questions": [
+      "Q1",
+      "Q2"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-007",
+    "source_pdf_page": 2,
+    "section": "1.2 Solutions for Extra Hardware Costs",
+    "block_type": "paragraph",
+    "original_text": "XFaaS tries to approximate a universal worker: every worker can instantly execute every function without cold-start overhead. It pushes code to local SSDs, keeps language runtimes running, runs multiple functions in one Linux process in a trusted private cloud, uses cooperative JIT compilation, and restricts a server to a subset of functions to improve JIT cache hits.",
+    "chinese_translation": "XFaaS 试图近似“通用工作节点”：每个工作节点都能无冷启动开销地立即执行任意函数。它把代码主动推送到本地 SSD，保持语言运行时持续运行；在可信私有云中让多个函数并发运行在同一个 Linux 进程内；使用协作式 JIT 编译；并把某台服务器接收的函数限制在一个子集内，以提高 JIT 代码缓存命中率。",
+    "relevant_questions": [
+      "Q1",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-008",
+    "source_pdf_page": 2,
+    "section": "1.2 Solutions for Extra Hardware Costs",
+    "block_type": "paragraph",
+    "original_text": "To reduce peak hardware cost, XFaaS intentionally provisions less capacity than peak demand and manages overload through time-shift computing, deadlines and criticality, cross-region dispatch, per-function quotas, throttling, and caller-specified future start times.",
+    "chinese_translation": "为了降低峰值硬件成本，XFaaS 有意不按峰值需求配置容量，而是通过时间转移计算、完成时限和关键性、跨区域分发、单函数配额、限流以及调用方指定未来执行开始时间来管理过载。",
+    "relevant_questions": [
+      "Q1",
+      "Q2",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-009",
+    "source_pdf_page": 3,
+    "section": "1.2 Solutions for Extra Hardware Costs",
+    "block_type": "paragraph",
+    "original_text": "XFaaS addresses downstream overload through adaptive concurrency control. It uses a global resource isolation and management system to collect metrics across systems and allows downstream services to send back-pressure signals; XFaaS responds with a TCP-like congestion-control mechanism.",
+    "chinese_translation": "XFaaS 通过自适应并发控制处理下游过载。它使用全局资源隔离与管理系统跨系统收集指标，并允许下游服务发送背压信号；XFaaS 随后用类似 TCP 的拥塞控制机制调节函数执行节奏。",
+    "relevant_questions": [
+      "Q1",
+      "Q2",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-010",
+    "source_pdf_page": 3,
+    "section": "1.2 Contributions",
+    "block_type": "bullet list",
+    "original_text": "The paper's contributions are production evidence about FaaS hardware cost, techniques approximating universal workers, techniques for load-spike management such as time-shift computing and cross-region dispatch, and adaptive concurrency control to protect downstream services.",
+    "chinese_translation": "本文贡献包括：用生产数据说明 FaaS 易用性是否会带来平台硬件成本；提出近似通用工作节点的一组技术；提出通过时间转移计算、跨区域分发等方式管理负载峰值的一组技术；以及提出保护下游服务的自适应并发控制。",
+    "relevant_questions": [
+      "Q1",
+      "Q2"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-011",
+    "source_pdf_page": 3,
+    "section": "2.1 Rapid Growth of FaaS in Our Private Cloud",
+    "block_type": "paragraph",
+    "original_text": "Daily function invocations in XFaaS increased 50 times over five years and now total trillions per day. The hyperscale of XFaaS requires efficient hardware use, especially under spiky loads.",
+    "chinese_translation": "XFaaS 的每日函数调用量在五年内增长了 50 倍，目前每天达到数万亿次。这样的超大规模要求系统高效使用硬件，尤其是在应对尖峰负载时。",
+    "relevant_questions": [
+      "Q2",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-012",
+    "source_pdf_page": 3,
+    "section": "2.2 Spiky Load",
+    "block_type": "paragraph",
+    "original_text": "XFaaS clients submit function calls in a highly spiky manner. One key insight is that some functions do not need immediate execution; functions triggered by queues, timers, storage, orchestration, and event-bridge workflows tend to be more delay-tolerant than direct RPC/HTTP functions.",
+    "chinese_translation": "XFaaS 客户端提交函数调用的方式高度尖峰化。关键洞察之一是，并非所有函数都需要立即执行；由队列、定时器、存储、编排和事件桥工作流触发的函数，通常比直接 RPC/HTTP 触发的函数更能容忍延迟。",
+    "relevant_questions": [
+      "Q1",
+      "Q2",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-013",
+    "source_pdf_page": 4,
+    "section": "2.3 Datacenters and Uneven Hardware Distribution",
+    "block_type": "paragraph",
+    "original_text": "XFaaS must balance regional locality and cross-region load balancing. Within a region, hardware is largely fungible, but cross-region bandwidth is lower and latency is much higher, so cross-region dispatch adds complexity.",
+    "chinese_translation": "XFaaS 必须在区域局部性和跨区域负载均衡之间取舍。同一区域内硬件基本可以互换，但跨区域带宽更低、延迟高得多，因此跨区域分发会增加复杂性。",
+    "relevant_questions": [
+      "Q1",
+      "Q2"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-014",
+    "source_pdf_page": 4,
+    "section": "2.4 Terminology",
+    "block_type": "paragraph",
+    "original_text": "A function has configurable attributes such as name, arguments, runtime, criticality, execution start time, completion deadline, resource quota, concurrency limit, and retry policy. Completion deadlines can range from seconds to 24 hours, and delay-tolerant functions can be postponed to off-peak hours.",
+    "chinese_translation": "函数具有多个可配置属性，包括名称、参数、运行时、关键性、执行开始时间、完成时限、资源配额、并发限制和重试策略。完成时限可以从数秒到 24 小时不等；当容量不足时，可容忍延迟的函数可以被推迟到低峰期执行。",
+    "relevant_questions": [
+      "Q1",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-015",
+    "source_pdf_page": 4,
+    "section": "3 Diverse Workloads",
+    "block_type": "paragraph",
+    "original_text": "XFaaS supports workloads from thousands of teams, with runtimes including PHP, Python, Erlang, Haskell, and C++, and triggers including queues, orchestration workflows, timers, storage, data streams, and event bridges.",
+    "chinese_translation": "XFaaS 支持来自数千个团队的多样化工作负载，运行时包括 PHP、Python、Erlang、Haskell 和 C++，触发方式包括队列、编排工作流、定时器、存储、数据流和事件桥。",
+    "relevant_questions": [
+      "Q2",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "TABLECAP-001",
+    "source_pdf_page": 5,
+    "section": "3.1 Function Categories",
+    "block_type": "table caption",
+    "original_text": "Table 1. Breakdown of functions by categories: queue-triggered functions are 89% of functions and 86% of compute usage; event-triggered functions are 8% of functions and 85% of function calls; timer-triggered functions are 3% of functions.",
+    "chinese_translation": "表 1. 按类别划分的函数：队列触发函数占函数数量的 89%、计算用量的 86%；事件触发函数占函数数量的 8%、函数调用量的 85%；定时触发函数占函数数量的 3%。",
+    "relevant_questions": [
+      "Q2",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-016",
+    "source_pdf_page": 5,
+    "section": "3.2 Workload Examples",
+    "block_type": "paragraph",
+    "original_text": "XFaaS workloads seldom handle user-facing interactive requests demanding sub-second response times, such as newsfeed display, search-result ranking, or video playback. At Meta, those requests are traditionally handled by long-running services because serverless functions offer no significant advantages in these scenarios.",
+    "chinese_translation": "XFaaS 工作负载很少处理要求亚秒级响应的用户交互请求，例如信息流展示、搜索结果排序或视频播放。在 Meta，这类请求通常由长期运行的服务处理，因为无服务器函数在这些场景中并没有显著优势。",
+    "relevant_questions": [
+      "Q2",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-017",
+    "source_pdf_page": 5,
+    "section": "3.2 Workload Examples",
+    "block_type": "paragraph",
+    "original_text": "The paper identifies two common benefits of serverless functions: pay-as-you-go with no upfront capacity planning, and streamlined deployment where developers write code while the platform handles deployment. For user-facing requests needing sub-second latency, the first benefit loses relevance because meticulous capacity planning is needed for Meta-scale user experience; the second benefit can be achieved with Meta's deployment automation.",
+    "chinese_translation": "论文指出无服务器函数通常有两个主要优势：按需付费且无需预先容量规划；开发者只写代码，由平台自动处理部署。但对于要求亚秒级延迟的用户请求，第一个优势在 Meta 场景下不再关键，因为为了数十亿用户的体验仍需精细容量规划；第二个优势也可以通过 Meta 的自动化部署系统实现。",
+    "relevant_questions": [
+      "Q1",
+      "Q2"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-018",
+    "source_pdf_page": 5,
+    "section": "3.2 Workload Examples",
+    "block_type": "paragraph",
+    "original_text": "Good XFaaS examples include asynchronous recommendations after user events, log processing that is not on the critical path but still has an SLO, productivity automation triggered by events, notification campaigns, and Morphing Framework functions that perform custom data transformation across stores.",
+    "chinese_translation": "适合 XFaaS 的例子包括：用户事件之后异步生成推荐；不在交互关键路径上、但仍有 SLO 的日志处理；由事件触发的生产力自动化；通知活动调度；以及在不同数据存储之间执行自定义数据转换的 Morphing Framework 函数。",
+    "relevant_questions": [
+      "Q2",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-019",
+    "source_pdf_page": 5,
+    "section": "3.3 Workload Resource Usage",
+    "block_type": "paragraph",
+    "original_text": "Resource consumption varies widely. CPU per call ranges from 0.37 MIPS at P10 to 1,064,280 MIPS at P99; 33% of calls finish within one second, 94% within 60 seconds, and 1% exceed five minutes.",
+    "chinese_translation": "资源消耗差异很大。单次调用 CPU 用量从 P10 的 0.37 MIPS 到 P99 的 1,064,280 MIPS 不等；33% 的调用在 1 秒内完成，94% 在 60 秒内完成，1% 超过 5 分钟。",
+    "relevant_questions": [
+      "Q1",
+      "Q2"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-020",
+    "source_pdf_page": 7,
+    "section": "4.1 Overview",
+    "block_type": "paragraph",
+    "original_text": "XFaaS's architecture includes submitters, durable queues, schedulers, worker load balancers, worker pools, configuration management, rate limiting, locality optimization, utilization control, and a global traffic conductor.",
+    "chinese_translation": "XFaaS 架构包括提交器、持久队列、调度器、工作节点负载均衡器、工作节点池、配置管理、限速、局部性优化、利用率控制和全局流量调度器。",
+    "relevant_questions": [
+      "Q1"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-021",
+    "source_pdf_page": 7,
+    "section": "4.2 Submitter",
+    "block_type": "paragraph",
+    "original_text": "Before sending a call, the submitter obtains the function's metadata and determines the target region and durable queue. It may route to the caller's preferred region or to another region for load balancing.",
+    "chinese_translation": "提交器在发送调用之前获取函数元数据，并决定目标区域和持久队列。它可以把调用路由到调用方偏好的区域，也可以为了负载均衡路由到其他区域。",
+    "relevant_questions": [
+      "Q1"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-022",
+    "source_pdf_page": 7,
+    "section": "4.3 DurableQ",
+    "block_type": "paragraph",
+    "original_text": "DurableQ provides at-least-once semantics. Calls are stored persistently and become available for retry if the scheduler fails to acknowledge them after dispatch.",
+    "chinese_translation": "DurableQ 提供至少一次语义。调用会被持久保存；如果调度器分发后没有确认，该调用会重新可见，以便其他调度器获取并重试。",
+    "relevant_questions": [
+      "Q1",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-023",
+    "source_pdf_page": 8,
+    "section": "4.4 Scheduler",
+    "block_type": "paragraph",
+    "original_text": "A scheduler orders function calls by criticality, deadline, and capacity quota. It reads per-function FuncBuffers and produces a RunQ that is dispatched for execution.",
+    "chinese_translation": "调度器根据关键性、截止时间和容量配额对函数调用排序。它读取每个函数的 FuncBuffer，并生成用于分发执行的 RunQ。",
+    "relevant_questions": [
+      "Q1",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-024",
+    "source_pdf_page": 8,
+    "section": "4.5 WorkerLB and Worker Pool",
+    "block_type": "paragraph",
+    "original_text": "Worker load balancers dispatch calls from RunQ to worker pools. Workers keep runtimes alive and execute multiple functions concurrently in one process, enabled by strong trust and isolation assumptions in the private cloud.",
+    "chinese_translation": "工作节点负载均衡器把 RunQ 中的调用分发到工作节点池。工作节点保持运行时常驻，并在一个进程中并发执行多个函数；这依赖私有云中的强信任和隔离假设。",
+    "relevant_questions": [
+      "Q1",
+      "Q2"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-025",
+    "source_pdf_page": 9,
+    "section": "4.5.1 Cooperative JIT Compilation",
+    "block_type": "paragraph",
+    "original_text": "Cooperative JIT compilation lets one server collect profiling data for a new function version and propagate it to other servers, so those servers can pre-compile the function before receiving calls.",
+    "chinese_translation": "协作式 JIT 编译让一台服务器为新函数版本收集 profiling 数据，并把这些数据传播给其他服务器，使它们在收到调用之前就能预编译函数。",
+    "relevant_questions": [
+      "Q1",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-026",
+    "source_pdf_page": 9,
+    "section": "4.5.2 Locality Groups",
+    "block_type": "paragraph",
+    "original_text": "A true universal worker is infeasible because keeping every function's JIT code in every worker's memory would exceed memory capacity, and memory-hungry functions may also exhaust memory. XFaaS partitions functions and workers into locality groups so only calls for a subset of functions are dispatched to a worker.",
+    "chinese_translation": "真正的通用工作节点并不可行，因为把每个函数的 JIT 代码都保存在每个工作节点内存中会超出内存容量；而内存密集型函数也可能耗尽内存。XFaaS 将函数和工作节点划分为局部性组，使某个工作节点只接收一部分函数的调用。",
+    "relevant_questions": [
+      "Q1",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-027",
+    "source_pdf_page": 10,
+    "section": "4.6 Quotas and Utilization Control",
+    "block_type": "paragraph",
+    "original_text": "XFaaS supports reserved quota and opportunistic quota. Reserved quota provides guaranteed capacity; opportunistic quota can be delayed until off-peak hours. This creates a direct tradeoff between latency guarantees and lower hardware cost.",
+    "chinese_translation": "XFaaS 支持预留配额和机会式配额。预留配额提供保证容量；机会式配额可以被推迟到低峰时段执行。这形成了延迟保证与较低硬件成本之间的直接取舍。",
+    "relevant_questions": [
+      "Q1",
+      "Q2",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-028",
+    "source_pdf_page": 10,
+    "section": "4.7 Adaptive Concurrency Control",
+    "block_type": "paragraph",
+    "original_text": "For a function's RPS limit r and execution time p, the number of running instances can reach R = r x p. If p is large, R can be large and cause too many concurrent calls to a downstream service, so XFaaS also supports concurrency limiting and back-pressure-aware rate control.",
+    "chinese_translation": "对于 RPS 限制为 r、执行时间为 p 的函数，运行实例数可能达到 R = r x p。如果 p 很大，R 也会很大，从而对下游服务产生过多并发调用。因此 XFaaS 还支持并发限制和感知背压的速率控制。",
+    "relevant_questions": [
+      "Q1",
+      "Q2"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-029",
+    "source_pdf_page": 11,
+    "section": "5.1 Overall CPU Utilization",
+    "block_type": "paragraph",
+    "original_text": "XFaaS achieves a daily average CPU utilization of 66%, and regional CPU utilization stays in a narrow band despite uneven hardware distribution. The peak-to-trough ratio of CPU utilization is only 1.4x, much lower than the 4.3x ratio for received calls.",
+    "chinese_translation": "XFaaS 达到 66% 的日均 CPU 利用率；尽管硬件分布不均，不同区域的 CPU 利用率仍保持在较窄范围内。CPU 利用率的峰谷比只有 1.4x，显著低于接收调用的 4.3x 峰谷比。",
+    "relevant_questions": [
+      "Q2",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-030",
+    "source_pdf_page": 11,
+    "section": "5.2 Locality Group and Memory Consumption",
+    "block_type": "paragraph",
+    "original_text": "A production experiment found that locality groups reduced worker memory consumption by 11.8% at P50 and 11.4% at P95. The results show that locality groups manage memory pressure while approximating universal workers.",
+    "chinese_translation": "生产实验发现，局部性组使工作节点内存消耗在 P50 降低 11.8%、在 P95 降低 11.4%。结果表明，局部性组能够管理内存压力，同时近似通用工作节点效果。",
+    "relevant_questions": [
+      "Q1",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-031",
+    "source_pdf_page": 12,
+    "section": "5.3 Time-Shifting Computing",
+    "block_type": "paragraph",
+    "original_text": "Opportunistic-quota functions can be deferred to off-peak hours. The CPU consumption of reserved and opportunistic functions almost exactly complements each other, showing that XFaaS schedules opportunistic functions during off-peak hours and can reduce peak capacity needs.",
+    "chinese_translation": "使用机会式配额的函数可以被推迟到低峰时段。预留函数和机会式函数的 CPU 消耗几乎互补，说明 XFaaS 能把机会式函数调度到低峰执行，并降低峰值容量需求。",
+    "relevant_questions": [
+      "Q1",
+      "Q2",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-032",
+    "source_pdf_page": 12,
+    "section": "5.4 Cooperative JIT Compilation",
+    "block_type": "paragraph",
+    "original_text": "With cooperative JIT compilation, a worker reached maximum RPS in three minutes after restart; without supplied JIT profiling data, it took 21 minutes. This highlights the importance of cooperative JIT under frequent function-code updates.",
+    "chinese_translation": "使用协作式 JIT 编译时，工作节点重启后 3 分钟达到最大 RPS；如果没有提供 JIT profiling 数据，则需要 21 分钟。这说明在频繁推送函数代码更新的情况下，协作式 JIT 非常重要。",
+    "relevant_questions": [
+      "Q1",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-033",
+    "source_pdf_page": 12,
+    "section": "5.5 Protecting Downstream Services",
+    "block_type": "paragraph",
+    "original_text": "During a WTCache incident, XFaaS slowed calls to functions that would further load WTCache, stored pending calls in DurableQs, and gradually increased execution rates after recovery; the backlog was processed within two hours.",
+    "chinese_translation": "在一次 WTCache 事故中，XFaaS 放慢了会进一步增加 WTCache 负载的函数调用，把待处理调用保存在 DurableQ 中，并在 WTCache 恢复后逐步提高执行速率；积压任务在两小时内处理完毕。",
+    "relevant_questions": [
+      "Q1",
+      "Q2"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-034",
+    "source_pdf_page": 13,
+    "section": "5.5 Protecting Downstream Services",
+    "block_type": "paragraph",
+    "original_text": "During a TAO migration incident, XFaaS automatically slowed as many as 200 unique functions and reduced traffic to TAO in the impacted region by about 40%, limiting user impact without manual intervention.",
+    "chinese_translation": "在一次 TAO 迁移事故中，XFaaS 自动放慢多达 200 个不同函数的执行，使受影响区域流向 TAO 的总流量减少约 40%，并在无需人工干预的情况下限制了用户影响。",
+    "relevant_questions": [
+      "Q1",
+      "Q2"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-035",
+    "source_pdf_page": 13,
+    "section": "6 XFaaS and Public Cloud",
+    "block_type": "paragraph",
+    "original_text": "XFaaS prioritizes local-region execution but can dispatch globally across regions for load balancing. This adds global coordination complexity, but the authors argue it may be relevant to public clouds as providers expand to many regions.",
+    "chinese_translation": "XFaaS 优先在本地区域执行，但必要时可以跨区域全局分发以实现负载均衡。这增加了全局协调复杂性，但作者认为，随着公有云提供商扩展到大量区域，这种思路也可能适用于公有云。",
+    "relevant_questions": [
+      "Q1",
+      "Q2"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-036",
+    "source_pdf_page": 13,
+    "section": "6 XFaaS and Public Cloud",
+    "block_type": "paragraph",
+    "original_text": "The authors argue that FaaS platforms should optimize resource utilization and throughput, not only call latency. If a platform focuses mainly on latency, it may keep VMs idle for long periods after invocation and over-provision for peak demand, leading to low hardware utilization.",
+    "chinese_translation": "作者认为，FaaS 平台不应只关注调用延迟，还应重视资源利用率和吞吐量。如果平台主要优化延迟，就可能在调用后长时间保持 VM 空闲，并按峰值需求过度配置硬件，从而导致硬件利用率低。",
+    "relevant_questions": [
+      "Q1",
+      "Q2",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-037",
+    "source_pdf_page": 13,
+    "section": "6 XFaaS and Public Cloud",
+    "block_type": "paragraph",
+    "original_text": "Industry workloads also contain many calls triggered by queues, events, storage, timers, and orchestration workflows. Some may have response expectations of a few seconds, but many non-RPC events are less likely to involve an interactive user waiting for an immediate response.",
+    "chinese_translation": "行业中的 FaaS 工作负载也包含大量由队列、事件、存储、定时器和编排工作流触发的调用。其中一部分可能有数秒级响应预期，但许多非 RPC 事件不像 HTTP/RPC 调用那样直接对应一个正在等待即时响应的交互用户。",
+    "relevant_questions": [
+      "Q2",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-038",
+    "source_pdf_page": 14,
+    "section": "6 XFaaS and Public Cloud",
+    "block_type": "paragraph",
+    "original_text": "Techniques that may apply to public clouds include future execution start times, user-chosen SLOs expressed as completion deadlines, and criticality levels so critical functions run first when capacity is low.",
+    "chinese_translation": "可能适用于公有云的技术包括：允许调用方指定未来执行开始时间；允许函数所有者用完成截止时间表达 SLO；以及设置关键性等级，使容量不足时关键函数优先执行。",
+    "relevant_questions": [
+      "Q1",
+      "Q2",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-039",
+    "source_pdf_page": 14,
+    "section": "6 XFaaS and Public Cloud",
+    "block_type": "paragraph",
+    "original_text": "Although public clouds cannot run functions from different users in the same Linux process as XFaaS does, large public-cloud customers may adopt XFaaS-like approaches inside virtual private clouds because a small fraction of teams can consume most capacity.",
+    "chinese_translation": "尽管公有云不能像 XFaaS 那样把不同用户的函数运行在同一个 Linux 进程内，但大型公有云客户可能在其虚拟私有云中采用类似 XFaaS 的方法，因为少数团队往往消耗了大部分容量。",
+    "relevant_questions": [
+      "Q1",
+      "Q2"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-040",
+    "source_pdf_page": 14,
+    "section": "7 Related Work",
+    "block_type": "paragraph",
+    "original_text": "Prior work studied serverless surveys, function scheduling, cold-start reduction, industry systems, and workload characterization. XFaaS differs by combining deferred delay-tolerant execution, precompiled runtimes, locality groups, and back-pressure mechanisms that consider downstream services.",
+    "chinese_translation": "已有工作研究了无服务器综述、函数调度、冷启动降低、工业系统和工作负载特征。XFaaS 的不同之处在于组合了可延迟执行、预编译运行时、局部性组，以及考虑下游服务的背压机制。",
+    "relevant_questions": [
+      "Q1",
+      "Q2"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "P-041",
+    "source_pdf_page": 14,
+    "section": "8 Conclusion",
+    "block_type": "paragraph",
+    "original_text": "XFaaS enables workers to serve requests for almost any function without cold start through proactive code deployment, cooperative JIT, cross-function runtime sharing, and locality groups. It also postpones delay-tolerant computation to off-peak hours and argues that FaaS workload management must consider downstream-service impact.",
+    "chinese_translation": "XFaaS 通过主动代码部署、协作式 JIT、跨函数运行时共享和局部性组，使工作节点几乎能够无冷启动地服务任意函数请求。它还把可容忍延迟的计算推迟到低峰时段，并主张 FaaS 工作负载管理必须考虑对下游服务的影响。",
+    "relevant_questions": [
+      "Q1",
+      "Q2",
+      "Q3"
+    ],
+    "notes": ""
+  },
+  {
+    "block_id": "ACK-001",
+    "source_pdf_page": 14,
+    "section": "Acknowledgments",
+    "block_type": "acknowledgments",
+    "original_text": "The paper presents a decade of work by several teams at Meta, including Async, FOQS, Web Foundation, Serverless Workflow, HHVM, and CEA.",
+    "chinese_translation": "本文呈现了 Meta 多个团队十年工作的成果，包括 Async、FOQS、Web Foundation、Serverless Workflow、HHVM 和 CEA。",
+    "relevant_questions": [],
+    "notes": ""
+  },
+  {
+    "block_id": "REF-001",
+    "source_pdf_page": 15,
+    "section": "References",
+    "block_type": "references",
+    "original_text": "References [1] Alexandru Agache, Marc Brooker, Alexandra Iordache, Anthony Liguori, Rolf Neugebauer, Phil Piwonka, and Diana-Maria Popa. Fire- cracker: Lightweight virtualization for serverless applications. In NSDI, volume 20, pages 419–434, 2020. [2] Istemi Ekin Akkus, Ruichuan Chen, Ivica Rimac, Manuel Stein, Klaus Satzke, Andre Beck, Paarijaat Aditya, and Volker Hilt. SAND: Towards high-performance serverless computing. In 2018 USENIX Annual Tech- nical Conference, pages 923–935, 2018. [3] Apache OpenWhisk. Accessed on April 4, 2023. [4] AWS Lambda. Accessed on April 4, 2023. [5] Azure Functions. Accessed on April 4, 2023. [6] Jeﬀ Barr. New - accelerate your lambda functions with lambda snap- start, 2022. Accessed on April 4, 2023. [7] David Ellio/t_t Bell. Looking back at the bell-la padula model. In 21st Annual Computer Security Applications Conference (ACSAC’05), pages 15–pp. IEEE, 2005. [8] Sol Boucher, Anuj Kalia, David G Andersen, and Michael Kaminsky. Pu/t_ting the ”micro” back in microservice. In 2018 USENIX Annual Technical Conference, pages 645–650, 2018. [9] Nathan Bronson, Zach Amsden, George Cabrera, Prasad Chakka, Peter Dimov, Hui Ding, Jack Ferris, Anthony Giardullo, Sachin Kulkarni, Harry Li, Mark Marchukov, Dmitri Petrov, Lovro Puzar, Yee Jiun Song, and Venkat Venkataramani. TAO: Facebook’s Distributed Data Store for the Social Graph. In Proceedings of the 2013 USENIX Annual Tech- nical Conference, pages 49–60, 2013. [10] Marc Brooker, Mike Danilov, Chris Greenwood, and Phil Piwonka. On- demand Container Loading in AWS Lambda. In 2023 USENIX Annual Technical Conference, pages 315–328, 2023. [11] James Cadden, /T_homas Unger, Yara Awad, Han Dong, Orran Krieger, and Jonathan Appavoo. Seuss: skip redundant paths to make serverless fast. In Proceedings of the Fi/f_teenth European Conference on Computer Systems, pages 1–15, 2020. [12] Guoqiang Jerry Chen, Janet L Wiener, Shridhar Iyer, Anshul Jaiswal, Ran Lei, Nikhil Simha, Wei Wang, Kevin Wilfong, Tim Williamson, and Serhat Yilmaz. Realtime Data Processing at Facebook. In Proceedings of the 2016 International Conference on Management of Data, pages 1087–1098, 2016. [13] Simon Eismann, Joel Scheuner, Erwin Van Eyk, Maximilian Schwinger, Johannes Grohmann, Nikolas Herbst, Cristina L Abad, and Alexandru Iosup. Serverless applications: Why, when, and how? IEEE So/f_tware, 38(1):32–39, 2020. [14] Marius Eriksen, Kaushik Veeraraghavan, Yusuf Abdulghani, Andrew Birchall, Po-Yen Chou, Richard Cornew, Adela Kabiljo, Ranjith Kumar S, Maroo Lieuw, Justin Meza, Sco/t_t Michelson, /T_homas Rohloff, Hayley Russell, Jeﬀ Qin, and Chunqiang Tang. Global Capacity Management with Flux. In Proceedings of the 17th USENIX Symposium on Operating Systems Design and Implementation, 2023. [15] Jason Flinn, Xianzheng Dou, Arushi Aggarwal, Alex Boyko, Francois Richard, Eric Sun, Wendy Tobagus, Nick Wolchko, and Fang Zhou. Owl: Scale and flexibility in distribution of hot content. In16th USENIX Symposium on Operating Systems Design and Implementation (OSDI 22), pages 1–15, 2022. [16] Alim Ul Gias and Giuliano Casale. Cocoa: Cold start aware capacity planning for function-as-a-service platforms. In 2020 28th International Symposium on Modeling, Analysis, and Simulation of Computer and Telecommunication Systems (MASCOTS), pages 1–8. IEEE, 2020. [17] Google Cloud Functions. Accessed on April 4, 2023. [18] Boris Grubic, Yang Wang, Tyler Petrochko, Ran Yaniv, Brad Jones, David Callies, Ma/t_t Clarke-Lauer, Dan Kelley, Soteris Demetriou, Kenny Yu, and Chunqiang Tang. Conveyor: One-Tool-Fits-All Contin- uous So/f_tware Deployment at Meta. In Proceedings of the 17th USENIX Symposium on Operating Systems Design and Implementation, 2023. [19] Katia Gil Guzman. How to Use Azure Queue-Triggered Functions and Why, December 2020. https://medium.com/swlh/how-to-use-azure- queue-triggered-functions-and-why-7f651c9d3f8c . [20] Hassan B Hassan, Saman A Barakat, and /Q_usay I Sarhan. Survey on serverless computing. Journal of Cloud Computing, 10(1):1–29, 2021. [21] Joseph M Hellerstein, Jose Faleiro, Joseph E Gonzalez, Johann Schleier- Smith, Vikram Sreekanti, Alexey Tumanov, and Chenggang Wu. Serverless computing: One step forward, two steps back. arXiv preprint arXiv:1812.03651, 2018. [22] Sco/t_t Hendrickson, Stephen Sturdevant, Tyler Harter, Venkateshwaran Venkataramani, Andrea C Arpaci-Dusseau, and Remzi H Arpaci- Dusseau. Serverless Computation with OpenLambda. In 8th USENIX workshop on hot topics in cloud computing (HotCloud 16), 2016. [23] HHVM. https://hhvm.com. [24] Hive. https://hive.apache.org. [25] Zhipeng Jia and Emme/t_t Witchel. Boki: Stateful serverless computing with shared logs. In Proceedings of the ACM SIGOPS 28th Symposium on Operating Systems Principles, pages 691–707, 2021. [26] Eric Jonas, Johann Schleier-Smith, Vikram Sreekanti, Chia-Che Tsai, Anurag Khandelwal, Qifan Pu, Vaishaal Shankar, Joao Carreira, Karl Krauth, Neeraja Yadwadkar, et al. Cloud programming simpli/f_ied: A berkeley view on serverless computing.arXiv preprint arXiv:1902.03383, 2019. [27] Kostis Kaﬀes, Neeraja J Yadwadkar, and Christos Kozyrakis. Central- ized core-granular scheduling for serverless functions. In Proceedings of the ACM symposium on cloud computing, pages 158–164, 2019. [28] Kostis Kaﬀes, Neeraja J Yadwadkar, and Christos Kozyrakis. Practi- cal scheduling for real-world serverless computing. arXiv preprint arXiv:2111.07226, 2021. [29] Zijun Li, Linsong Guo, Jiagan Cheng, /Q_uan Chen, BingSheng He, and Minyi Guo. The serverless computing survey: A technical primer for design architecture. ACM Computing Surveys (CSUR), 54(10s):1–34, 2022. [30] Ashraf Mahgoub, Edgardo Barsallo Yi, Karthick Shankar, Sameh El- nikety, Somali Chaterji, and Saurabh Bagchi. ORION and the three rights: Sizing, bundling, and prewarming for serverless DAGs. In 16th USENIX Symposium on Operating Systems Design and Implementation (OSDI 22), pages 303–320, 2022. [31] Anupama Mampage, Shanika Karunasekera, and Rajkumar Buyya. A holistic view on resource management in serverless computing environments: Taxonomy and future directions. ACM Computing Surveys (CSUR), 54(11s):1–36, 2022. [32] Michael Mitzenmacher. The power of two choices in randomized load balancing. IEEE Transactions on Parallel and Distributed Systems, 12(10):1094–1104, 2001. [33] Anup Mohan, Harshad S Sane, Kshitij Doshi, Saikrishna Edupuganti, Naren Nayak, and Vadim Sukhomlinov. Agile cold starts for scalable serverless. HotCloud, 2019(10.5555):3357034–3357060, 2019. [34] Edward Oakes, Leon Yang, Kevin Houck, Tyler Harter, Andrea C Arpaci-Dusseau, and Remzi H Arpaci-Dusseau. Pipsqueak: Lean lamb- das with large libraries. In 2017 IEEE 37th International Conference on Distributed Computing Systems Workshops (ICDCSW) , pages 395–400. IEEE, 2017. [35] Edward Oakes, Leon Yang, Dennis Zhou, Kevin Houck, Tyler Harter, Andrea Arpaci-Dusseau, and Remzi Arpaci-Dusseau. SOCK: Rapid task provisioning with serverless-optimized containers. In 2018 USENIX Annual Technical Conference, pages 57–70, 2018. [36] Guilherme O/t_toni. HHVM JIT: A Pro/f_ile-guided, Region-based Com- piler for PHP and Hack. In Proceedings of the 39th ACM SIGPLAN Con- ference on Programming Language Design and Implementation, pages 151–165, 2018. [37] Guilherme O/t_toni and Bin Liu. HHVM jump-start: Boosting both warmup and steady-state performance at scale. In 2021 IEEE/ACM International Symposium on Code Generation and Optimization (CGO), 245 pages 340–350. IEEE, 2021. [38] Rohan Basu Roy, Tirthak Patel, and Devesh Tiwari. Icebreaker: Warm- ing serverless functions better with heterogeneity. In Proceedings of the 27th ACM International Conference on Architectural Support for Programming Languages and Operating Systems , pages 753–767, 2022. [39] Mohammad Shahrad, Rodrigo Fonseca, Inigo Goiri, Gohar Chaudhry, Paul Batum, Jason Cooke, Eduardo Laureano, Colby Tresness, Mark Russinovich, and Ricardo Bianchini. Serverless in the wild: Character- izing and optimizing the serverless workload at a large cloud provider. In USENIX Annual Technical Conference, 2020. [40] Chunqiang Tang, /T_hawan Kooburat, Pradeep Venkatachalam, Akshay Chander, Zhe Wen, Aravind Narayanan, Patrick Dowell, and Robert Karl. Holistic Configuration Management at Facebook. In Proceedings of the 25th Symposium on Operating Systems Principles, pages 328–343, 2015. [41] Ali Tariq, Austin Pahl, Sharat Nimmagadda, Eric Rozner, and Siddharth Lanka. Sequoia: Enabling quality-of-service in serverless computing. In Proceedings of the 11th ACM Symposium on Cloud Computing, pages 311–327, 2020. [42] Ashish /T_husoo, Zheng Shao, Suresh Anthony, Dhruba Borthakur, Na- mit Jain, Joydeep Sen Sarma, Raghotham Murthy, and Hao Liu. Data warehousing and analytics infrastructure at facebook. In Proceedings of the 2010 ACM SIGMOD International Conference on Management of data, pages 1013–1020, 2010. [43] Ao Wang, Shuai Chang, Huangshi Tian, Hongqi Wang, Haoran Yang, Huiba Li, Rui Du, and Yue Cheng. FaaSNet: Scalable and Fast Provi- sioning of Custom Serverless Container Runtimes at Alibaba Cloud Function Compute. In USENIX Annual Technical Conference, 2021. [44] Kai-Ting Amy Wang, Rayson Ho, and Peng Wu. Replayable execution optimized for page sharing for a managed runtime environment. In Proceedings of the Fourteenth EuroSys Conference 2019, pages 1–16, 2019. [45] Liang Wang, Mengyuan Li, Yinqian Zhang, /T_homas Ristenpart, and Michael Swi/f_t. Peeking behind the curtains of serverless platforms. In 2018 USENIX Annual Technical Conference, pages 133–146, 2018. [46] Ethan G Young, Pengfei Zhu, Tyler Caraza-Harter, Andrea C Arpaci- Dusseau, and Remzi H Arpaci-Dusseau. The true cost of containing: A gvisor case study. In HotCloud, 2019. [47] Tianyi Yu, Qingyuan Liu, Dong Du, Yubin Xia, Binyu Zang, Ziqian Lu, Pingchao Yang, Chenggang Qin, and Haibo Chen. Characterizing serverless platforms with serverlessbench. In Proceedings of the 11th ACM Symposium on Cloud Computing, pages 30–44, 2020. [48] Haoran Zhang, Adney Cardoza, Peter Baile Chen, Sebastian Angel, and Vincent Liu. Fault-tolerant and transactional stateful serverless workflows. In14th USENIX Symposium on Operating Systems Design and Implementation (OSDI 20), pages 1187–1204, 2020. [49] Yanqi Zhang, ´I ˜nigo Goiri, Gohar Irfan Chaudhry, Rodrigo Fonseca, Sameh Elnikety, Christina Delimitrou, and Ricardo Bianchini. Faster and cheaper serverless computing on harvested resources. In Pro- ceedings of the ACM SIGOPS 28th Symposium on Operating Systems Principles, pages 724–739, 2021. 246",
+    "chinese_translation": "参考文献按用户规则不翻译。请在原始 PDF 第 15-16 页核对完整参考文献列表。",
+    "relevant_questions": [],
+    "notes": "Bibliography preserved as original text and not translated."
+  }
+]

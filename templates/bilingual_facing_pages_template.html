@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{paper_title}} - Bilingual Reading Package</title>
+  <link rel="stylesheet" href="print.css">
+</head>
+<body>
+  <section class="cover page">
+    <h1>{{paper_title}}</h1>
+    <p class="subtitle">Question-Guided Bilingual Academic Reading Package</p>
+    <dl>
+      <div>
+        <dt>Source PDF</dt>
+        <dd>{{source_pdf}}</dd>
+      </div>
+      <div>
+        <dt>Generated on</dt>
+        <dd>{{generated_date}}</dd>
+      </div>
+    </dl>
+  </section>
+
+  <main class="front-matter">
+    <section class="page">
+      <h2>Confirmed Reading Questions</h2>
+      {{confirmed_questions}}
+    </section>
+
+    <section class="page">
+      <h2>Question-Answer Review</h2>
+      {{question_answer_review}}
+    </section>
+
+    <section class="page">
+      <h2>Glossary</h2>
+      {{glossary}}
+    </section>
+  </main>
+
+  <main class="paper-body">
+    <section class="body-title page">
+      <h2>Bilingual Paper Body</h2>
+      <p>Body pages are arranged as English original followed by matching Chinese translation.</p>
+    </section>
+
+    {{#block_groups}}
+    <section class="spread-group">
+      <article class="page facing-page english-page">
+        <header>
+          <p class="block-meta">{{section}} | Original PDF p. {{source_pdf_page}} | {{block_ids}}</p>
+        </header>
+        <div class="content original">
+          {{english_blocks}}
+        </div>
+      </article>
+
+      <article class="page facing-page chinese-page">
+        <header>
+          <p class="block-meta">{{section}} | 原始 PDF 第 {{source_pdf_page}} 页 | {{block_ids}}</p>
+        </header>
+        <div class="content translation">
+          {{chinese_blocks}}
+        </div>
+      </article>
+    </section>
+    {{/block_groups}}
+  </main>
+
+  <section class="page appendix">
+    <h2>Quality-Check Note</h2>
+    {{quality_check_note}}
+  </section>
+</body>
+</html>
